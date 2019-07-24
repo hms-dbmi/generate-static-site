@@ -15,7 +15,7 @@ POLICY=`erb "$DIR/aws-template/policy.json.erb"`
 echo "Policy doc: $POLICY"
 
 POLICY_NAME="$CLEAN-policy"
-POLICY_ARN=`aws iam create-policy --policy-name "$POLICY_NAME" --policy-document "$POLICY"  --description "Auto-generated policy for $HOST." --query 'Policy.Arn'`
+POLICY_ARN=`aws iam create-policy --policy-name "$POLICY_NAME" --policy-document "$POLICY"  --description "Auto-generated policy for $HOST." --query 'Policy.Arn' --output text`
 echo "Created $POLICY_NAME with ARN $POLICY_ARN"
 
 USER_NAME="$CLEAN-user"
