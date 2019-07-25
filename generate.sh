@@ -7,20 +7,20 @@ n=$(tput sgr0)
 
 [ "$#" = 1 ] || die 'Expects one argument, s3 bucket name (= site hostname).'
 
-export HOST="$1"
-[[ "$HOST" = *.org ]] || [[ "$HOST" = *.io ]] || die "'$HOST' does not look like a hostname."
-
-CLEAN=`echo "$HOST" | sed -e 's/[^[:alnum:]]/-/g'`
+export BUCKET="$1" # Exported envvar used by ERB template
+VALID_BUCKET_RE='^[a-z0-9-]+\.(org|com|io)$'
+[[ "$BUCKET" =~ $VALID_BUCKET_RE ]] || die "'$BUCKET' does not match /$VALID_BUCKET_RE/."
+CLEAN=`echo "$BUCKET" | sed -e 's/[^[:alnum:]]/-/g'`
 
 DIR=`dirname $0`
 POLICY=`erb "$DIR/aws-template/policy.json.erb"`
-echo "${b}Filled policy template${n} $POLICY"
+echo "${b}Filled policy template${n}"
 
 POLICY_NAME="$CLEAN-policy"
 POLICY_ARN=`aws iam create-policy \
   --policy-name "$POLICY_NAME" \
   --policy-document "$POLICY" \
-  --description "Auto-generated policy for $HOST." \
+  --description "Auto-generated policy for $BUCKET." \
   --query 'Policy.Arn' \
   --output text`
 echo "${b}Created policy${n} $POLICY_NAME ${b}with ARN${n} $POLICY_ARN"
@@ -47,3 +47,23 @@ ACCESS_KEY_ID=`aws iam list-access-keys \
   --query 'AccessKeyMetadata[0].AccessKeyId' \
   --output text`
 echo "${b}Access key ID${n} $ACCESS_KEY_ID"
+
+aws s3api create-bucket \
+  --bucket "$BUCKET" \
+  --acl public-read > /dev/null
+echo "${b}Created bucket${n} $BUCKET"
+
+# TODO: Copy Jekyll output
+aws s3 cp \
+  --recursive \
+  --acl public-read \
+  "$DIR/site-template" "s3://$BUCKET"
+
+REGION=`aws configure get region`
+# Can't find an API that gives this to us?
+URL="http://$BUCKET.s3-website-$REGION.amazonaws.com"
+
+aws s3 website "s3://$BUCKET/" \
+  --index-document index.html \
+  --error-document error.html
+echo "${b}Set up static hosting${n} $URL"
