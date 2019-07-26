@@ -13,10 +13,8 @@
                 "s3:PutObjectAcl"
             ],
             "Resource": [
-                "arn:aws:s3:::<%= ENV['HOST'] %>",
-                "arn:aws:s3:::<%= ENV['HOST'] %>",
-                "arn:aws:s3:::<%= ENV['HOST'] %>/*",
-                "arn:aws:s3:::<%= ENV['HOST'] %>/*"
+                "arn:aws:s3:::<%= ENV['BUCKET'] %>",
+                "arn:aws:s3:::<%= ENV['BUCKET'] %>/*"
             ]
         }
     ]
