@@ -3,6 +3,7 @@ set -o errexit
 
 die() { set +v; echo "$*" 1>&2 ; exit 1; }
 b=$(tput bold)
+r=$(tput rev)
 n=$(tput sgr0)
 
 [ "$#" = 2 ] || die 'Expects two arguments: github owner team/user, and s3 bucket name (= site hostname).'
@@ -15,8 +16,14 @@ DIR=`dirname $0`
 CLEAN=`echo "$BUCKET" | sed -e 's/[^[:alnum:]]/-/g'`
 REPO="$OWNER/$CLEAN"
 
+echo_title() {
+  echo
+  echo "${r}$1${n}"
+  echo
+}
+
 preflight_checks() {
-  echo 'Preflight checks ...'
+  echo_title 'Preflight checks ...'
   GH_API="https://api.github.com/repos/$REPO"
   curl --silent --fail "$GH_API" > /dev/null \
     || die "Please create '$REPO', but ${b}do not${n} initialize with a README: https://github.com/new"
@@ -33,7 +40,7 @@ preflight_checks() {
 }
 
 aws_create_bucket() {
-  echo 'Create bucket ...'
+  echo_title 'Create bucket ...'
   # Create bucket first to make sure the name is free.
   aws s3api create-bucket \
     --bucket "$BUCKET" \
@@ -55,7 +62,7 @@ aws_create_bucket() {
 }
 
 aws_iam_setup () {
-  echo 'IAM setup ...'
+  echo_title 'IAM setup ...'
 
   POLICY=`erb "$DIR/aws-template/policy.json.erb"`
   echo "${b}Filled policy template${n}"
@@ -94,7 +101,7 @@ aws_iam_setup () {
 }
 
 init_repo() {
-  echo 'Init repo ...'
+  echo_title 'Init repo ...'
 
   # Init the repo: it needs to exist before we can encrypt variables for travis
   git init "repos/$CLEAN"
@@ -108,7 +115,7 @@ init_repo() {
 }
 
 fill_template() {
-  echo 'Fill template ...'
+  echo_title 'Fill template ...'
 
   for FILE in `find $DIR/repo-template`; do
     if [ -f "$FILE" ]; then
@@ -130,11 +137,11 @@ fill_template() {
 }
 
 encrypt_secret_access_key() {
-  echo "TODO: $SECRET_ACCESS_KEY"
+  echo_title "TODO: $SECRET_ACCESS_KEY"
 }
 
 run_jekyll() {
-  echo 'Jekyll dry run ...'
+  echo_title 'Jekyll dry run ...'
   # This should usually be done by travis...
   # but doing a trial run can uncover some problems.
 
@@ -153,6 +160,7 @@ fill_template
 encrypt_secret_access_key
 run_jekyll
 
-echo "Visit https://travis-ci.org/account/repositories and click 'Sync account'."
-echo "Find your new repo '$REPO' in the list and toggle it on."
-echo "Now when you push changes to master on the repo, Travis will run Jenkins and push to S3."
+echo_title 'Next steps:'
+echo "• Visit https://travis-ci.org/account/repositories and click 'Sync account'."
+echo "• Find your new repo '$REPO' in the list and toggle it on."
+echo "• Now when you push changes to master on the repo, Travis will run Jenkins and push to S3."
