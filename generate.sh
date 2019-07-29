@@ -173,7 +173,7 @@ run_jekyll
 
 echo_title 'Done'
 echo "Repo initialized:"
-echo "  Local:  {$b}repos/$CLEAN${n}"
-echo "  GitHub: {$b}https://github.com/$REPO${n}"
+echo "  Local:  ${b}repos/$CLEAN${n}"
+echo "  GitHub: ${b}https://github.com/$REPO${n}"
 echo "When you push changes to master, Travis will run Jekyll, push to S3,"
 echo "and update $URL"
