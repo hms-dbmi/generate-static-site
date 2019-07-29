@@ -19,5 +19,5 @@ deploy:
   acl: public_read
   local_dir: _site
   access_key_id: <%= ENV['ACCESS_KEY_ID'] %>
-  secret_access_key:
-    secure: <%= ENV['SECURE_SECRET_ACCESS_KEY'] %>
+  secret_access_key: $SECRET_ACCESS_KEY
+  # Encrypted key will be adding via Travis CLI

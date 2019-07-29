@@ -131,13 +131,24 @@ fill_template() {
 
   cd "repos/$CLEAN"
   git add .
-  git commit -m 'README'
+  git commit -m 'Fill template'
   git push origin master
   cd -
 }
 
 encrypt_secret_access_key() {
-  echo_title "TODO: $SECRET_ACCESS_KEY"
+  echo_title "Encrypt key..."
+
+  echo "• Visit ${b}https://travis-ci.org/account/repositories${n} and click 'Sync account'."
+  echo "• Find your new repo '${b}$REPO${n}' in the list and toggle it on."
+  read -p '(When ready, hit return to continue...) '
+
+  cd "repos/$CLEAN"
+  travis encrypt SECRET_ACCESS_KEY="$SECRET_ACCESS_KEY" --add env.global
+  git add .
+  git commit -m 'Add encrypted key'
+  git push origin master
+  cd -
 }
 
 run_jekyll() {
@@ -160,7 +171,5 @@ fill_template
 encrypt_secret_access_key
 run_jekyll
 
-echo_title 'Next steps:'
-echo "• Visit https://travis-ci.org/account/repositories and click 'Sync account'."
-echo "• Find your new repo '$REPO' in the list and toggle it on."
-echo "• Now when you push changes to master on the repo, Travis will run Jenkins and push to S3."
+echo_title 'Done'
+echo "Now when you push changes to master on the repo, Travis will run Jenkins and push to S3."
