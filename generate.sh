@@ -53,7 +53,7 @@ aws_create_bucket() {
 
   REGION=`aws configure get region`
   # Can't find an API that gives this to us?
-  URL="http://$BUCKET.s3-website-$REGION.amazonaws.com"
+  export URL="http://$BUCKET.s3-website-$REGION.amazonaws.com"
 
   aws s3 website "s3://$BUCKET/" \
     --index-document index.html \
@@ -172,4 +172,8 @@ encrypt_secret_access_key
 run_jekyll
 
 echo_title 'Done'
-echo "Now when you push changes to master on the repo, Travis will run Jenkins and push to S3."
+echo "Repo initialized:"
+echo "  Local:  {$b}repos/$CLEAN${n}"
+echo "  GitHub: {$b}https://github.com/$REPO${n}"
+echo "When you push changes to master, Travis will run Jekyll, push to S3,"
+echo "and update $URL"
