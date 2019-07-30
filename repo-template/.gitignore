@@ -1,0 +1,10 @@
+_site/
+.sass-cache/
+.jekyll-metadata
+**/.DS_Store
+node_modules
+.idea
+package-lock.json
+*.swp
+*.un~
+.Rhistory

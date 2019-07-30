@@ -1,0 +1,23 @@
+language: ruby
+before_install:
+  - npm install -g npm@3.10.9
+before_script:
+  - npm install
+script:
+  - set -e
+  - bundle exec jekyll build
+  - "! grep -n '<ERROR' -r _site"
+  - bundle exec htmlproofer --alt-ignore '/.*/' --check-html --disable-external --assume-extension ./_site
+# https://docs.travis-ci.com/user/deployment/#Conditional-Releases-with-on%3A :
+# "Name of the branch. If omitted, this defaults to the app-specific branch, or master."
+# ie, The default behavior is only to deploy the master branch.
+deploy:
+  provider: s3
+  bucket: <%= ENV['BUCKET'] %>
+  skip_cleanup: true
+  region: <%= ENV['REGION'] %>
+  acl: public_read
+  local_dir: _site
+  access_key_id: <%= ENV['ACCESS_KEY_ID'] %>
+  secret_access_key: $SECRET_ACCESS_KEY
+  # SECRET_ACCESS_KEY will be a Travis envvar set via CLI.
